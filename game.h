@@ -38,11 +38,8 @@ private:
     void putpixel(int x, int y, Uint32 pixel);
     Uint32 getpixel(int itex, int x, int y);
 
-    bool game_running_;
-
-    float x,y,a;    
-
-    int strafe_;
+    float x_,y_,angle_;
+    int turn_;
     int walk_;
 
     SDL_Surface* sdl_screen_;
@@ -53,6 +50,8 @@ private:
     int width_;
     int height_;
     int bpp_;
+
+    bool game_running_;
 };
 
 #endif

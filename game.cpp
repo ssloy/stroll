@@ -10,7 +10,6 @@ void Game::draw() {
     for (int i=0; i<mapw; i++) { // draw the map
         for (int j=0; j<maph; j++) {
             if (map[i+j*mapw]==' ') continue;
-            SDL_Rect tmp;
             for (int x=0; x<32; x++) {
                 for (int y=0; y<32; y++) {
                     putpixel(x + i*32+w, y + j*32, getpixel(map[i+j*mapw]-'0', texsize/2, texsize/2));
@@ -20,10 +19,10 @@ void Game::draw() {
     }
 
     for (int i=0; i<w; i++) { // draw the "3D" view + visibility cone
-        float ca = (1.-i/float(w)) * (a-fov/2.) + i/float(w)*(a+fov/2.);
+        float ca = (1.-i/float(w)) * (angle_-fov/2.) + i/float(w)*(angle_+fov/2.);
         for (float t=0; t<20; t+=.05) {
-            float cx = x+cos(ca)*t;
-            float cy = y+sin(ca)*t;
+            float cx = x_+cos(ca)*t;
+            float cy = y_+sin(ca)*t;
             putpixel(w+cx*32, cy*32, 0); // visibility cone at the map
 
             int idx = int(cx)+int(cy)*mapw;
@@ -42,10 +41,8 @@ void Game::draw() {
     SDL_Flip(sdl_screen_);
 }
 
-
-Game::Game() : x(3.456), y(3.456), a(0), strafe_(0), walk_(0) {
-    game_running_ = false;
-    sdl_screen_ = textures_ = NULL;
+Game::Game() : x_(3.456), y_(3.456), angle_(0), turn_(0), walk_(0), 
+    sdl_screen_(NULL), textures_(NULL), ntextures(0), texsize(0), width_(0), height_(0), bpp_(0), game_running_(false) {
 }
 
 bool Game::init_sdl(const char* title, int width, int height, int bpp) {
@@ -95,28 +92,26 @@ void Game::handle_events() {
     if (SDL_PollEvent(&event)) {
         game_running_ = !(SDL_QUIT==event.type || (SDL_KEYDOWN==event.type && SDLK_ESCAPE==event.key.keysym.sym));
         if (SDL_KEYUP==event.type) {
-            if ('a'==event.key.keysym.sym || 'd'==event.key.keysym.sym) strafe_ = 0;
-            if ('w'==event.key.keysym.sym || 's'==event.key.keysym.sym) walk_   = 0;
+            if ('a'==event.key.keysym.sym || 'd'==event.key.keysym.sym) turn_ = 0;
+            if ('w'==event.key.keysym.sym || 's'==event.key.keysym.sym) walk_ = 0;
         }
         if (SDL_KEYDOWN==event.type) {
-            if ('d'==event.key.keysym.sym) strafe_ =  1;
-            if ('a'==event.key.keysym.sym) strafe_ = -1;
+            if ('a'==event.key.keysym.sym) turn_ = -1;
+            if ('d'==event.key.keysym.sym) turn_ =  1;
             if ('w'==event.key.keysym.sym) walk_ =  1;
             if ('s'==event.key.keysym.sym) walk_ = -1;
-        }
-        if (event.type == SDL_MOUSEMOTION) {
-            a += event.motion.xrel * .01;
         }
     }
 
     // TODO proper delays
 
-    float nx = x + strafe_*cos(a+M_PI/2)*.1 + walk_*cos(a)*.1;
-    float ny = y + strafe_*sin(a+M_PI/2)*.1 + walk_*sin(a)*.1;
+    angle_ += float(turn_)*.05;
+    float nx = x_ + walk_*cos(angle_)*.1;
+    float ny = y_ + walk_*sin(angle_)*.1;
 
     if (int(nx)>=0 && int(nx)<mapw && int(ny)>=0 && int(ny)<maph && map[int(nx)+int(ny)*mapw]==' ') {
-        x = nx;
-        y = ny;
+        x_ = nx;
+        y_ = ny;
     }
 }
 
