@@ -61,7 +61,7 @@ bool Game::init_sdl(const char* title, int width, int height, int bpp) {
     height_ = height;
     bpp_ = bpp;
 
-    SDL_WM_GrabInput(SDL_GRAB_ON);
+//    SDL_WM_GrabInput(SDL_GRAB_ON);
     SDL_ShowCursor(SDL_DISABLE);
 
     textures_ = SDL_LoadBMP("walltext.bmp");
